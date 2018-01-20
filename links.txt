@@ -1,0 +1,15 @@
+Unsere Ausgangsseite:
+https://medium.com/@curiousily/making-a-predictive-keyboard-using-recurrent-neural-networks-tensorflow-for-hackers-part-v-3f238d824218
+
+GitHub:
+https://github.com/kootenpv/neural_complete
+
+Blog Eintrag eines Asiaten der ein Text Generator mit Recurrent Neural Network erstellt hat:
+https://chunml.github.io/ChunML.github.io/project/Creating-Text-Generator-Using-Recurrent-Neural-Network/
+
+Im Blog Eintrag des Asiaten sind eine nützliche Links zu RNNs Tutorials 
+http://www.wildml.com/2015/09/recurrent-neural-networks-tutorial-part-1-introduction-to-rnns/
+
+Zusätzlich noch eine kleine Sammlung von LSTMs Erklärungen
+https://en.wikipedia.org/wiki/Long_short-term_memory
+http://colah.github.io/posts/2015-08-Understanding-LSTMs/
