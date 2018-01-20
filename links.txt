@@ -1,6 +1,9 @@
 Unsere Ausgangsseite:
 https://medium.com/@curiousily/making-a-predictive-keyboard-using-recurrent-neural-networks-tensorflow-for-hackers-part-v-3f238d824218
 
+GitHub:
+https://github.com/kootenpv/neural_complete
+
 Blog Eintrag eines Asiaten der ein Text Generator mit Recurrent Neural Network erstellt hat:
 https://chunml.github.io/ChunML.github.io/project/Creating-Text-Generator-Using-Recurrent-Neural-Network/
 
