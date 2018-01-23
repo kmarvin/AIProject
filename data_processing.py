@@ -1,7 +1,12 @@
+
 # coding: utf-8
+
+# In[281]:
+
 
 import numpy as np
 from easydict import EasyDict as edict
+import load_config
 
 import torch
 from torch.utils.data import Dataset, DataLoader
@@ -14,18 +19,35 @@ import torch.optim as optim
 
 # #### Configuration / parameters to set
 
+# In[282]:
 
-args = edict()
-args.seq_len = 30
-args.offset = 4
-args.cuda = False
-args.batch_size = 1
-args.num_layers = 3
-args.hidden_size = 128
+def set_config(config_path = "config.txt", args = {}):
+    with open(config_path) as source:
+        for line in source:
+            line = line.strip()
+            argLong, valueLong = line.split('=')
+            arg = argLong.strip()
+            value = valueLong.strip()
+            if value == 'True':
+                value = True
+            elif value == 'False':
+                value = False
+            else:
+                value = int(value)
+            args[arg] = value
+    return edict(args)
+
+
+# In[283]:
+
+config_path = 'config.txt'
+args = set_config(config_path, args)
+print(args)
 
 
 # ### Data Processing functions and classes
 
+# In[284]:
 
 def prepare_text(textsource):
     text = ''
@@ -33,12 +55,15 @@ def prepare_text(textsource):
         for line in txtsource:
             line = line.strip().lower()
             line = line.replace(',', '').replace('.', '')
+            line = line.replace('»', '').replace('«', '')
+            line = line.replace('"', '')
             text += ' ' + line
-    text = text[:500] #### nachher wieder rauslöschen!!!
+    text = text[:700] #### nachher wieder rauslöschen!!!
     return text
 # Chevrons müssen noch weg
 
 
+# In[285]:
 
 def prepare_data(text, seq_len, offset):
     # Get all the unique characters appearing in the text 
@@ -67,6 +92,7 @@ def prepare_data(text, seq_len, offset):
     return X, y, no_classes
 
 
+# In[286]:
 
 class TextDataset(Dataset):
     ''' A text dataset class which implements the abstract class torch.utils.data.Dataset. '''
@@ -84,6 +110,7 @@ class TextDataset(Dataset):
 
 # ### LSTM functions and classes
 
+# In[287]:
 
 class LSTM_RNN(nn.Module):
     
@@ -108,6 +135,7 @@ class LSTM_RNN(nn.Module):
         return res
 
 
+# In[288]:
 
 # Training loop (one epoch)
 def train(model, epoch):
@@ -133,6 +161,19 @@ def train(model, epoch):
 
 # ### Main code
 
+# In[289]:
+
+# test the functions defined above
+textsource = './Brown_Leseprobe.txt'
+text = prepare_text(textsource)
+feat, true_pred, no_classes = prepare_data(text, args.seq_len, args.offset)
+print(feat.shape)
+print(no_classes)
+print(text)
+
+
+# In[290]:
+
 # Generate train and test loader from our data
 train_text = prepare_text('./Brown_Leseprobe.txt')
 train_set = TextDataset(train_text, args.seq_len, args.offset)
@@ -145,18 +186,53 @@ no_classes = train_set.no_classes
 input_shape = (args.seq_len, no_classes) # seq_len * nr. of unique characters 
 
 
+# In[291]:
+
 # Generate model
 rnn = LSTM_RNN(input_shape)
 if args.cuda:
     rnn.cuda()
 print(rnn)
 
+
+# In[294]:
+
 # Initialize the optimization algorithm
 optimizer = optim.RMSprop(rnn.parameters(), lr=0.01)
 
-# Training
-for epoch in range(2):
+
+# In[ ]:
+
+for epoch in range(5):
     train(rnn, epoch)
+
+
+# In[ ]:
+
+
+
+
+# In[49]:
+
+rnn = nn.LSTM(10, 20, 2)
+input = Variable(torch.randn(5, 3, 10))
+h0 = Variable(torch.randn(2, 3, 20))
+c0 = Variable(torch.randn(2, 3, 20))
+output = rnn(input, (h0, c0))
+print(type(output))
+
+
+# In[50]:
+
+output = Variable(torch.rand(1,10))
+target = Variable(torch.LongTensor([1]))
+print(output, target)
+criterion = nn.CrossEntropyLoss()
+loss = criterion(output, target)
+print(loss)
+
+
+# In[ ]:
 
 
 
