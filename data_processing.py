@@ -1,12 +1,11 @@
 
 # coding: utf-8
 
-# In[281]:
+# In[280]:
 
 
 import numpy as np
 from easydict import EasyDict as edict
-import load_config
 
 import torch
 from torch.utils.data import Dataset, DataLoader
@@ -16,12 +15,16 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
 
+import heapq
+
+# Import other python files
+
 
 # #### Configuration / parameters to set
 
-# In[282]:
+# In[281]:
 
-def set_config(config_path = "config.txt", args = {}):
+def set_config(config_path = "config.txt", args = dict()):
     with open(config_path) as source:
         for line in source:
             line = line.strip()
@@ -38,16 +41,17 @@ def set_config(config_path = "config.txt", args = {}):
     return edict(args)
 
 
-# In[283]:
+# In[282]:
 
 config_path = 'config.txt'
+args = {}
 args = set_config(config_path, args)
 print(args)
 
 
 # ### Data Processing functions and classes
 
-# In[284]:
+# In[389]:
 
 def prepare_text(textsource):
     text = ''
@@ -57,13 +61,14 @@ def prepare_text(textsource):
             line = line.replace(',', '').replace('.', '')
             line = line.replace('»', '').replace('«', '')
             line = line.replace('"', '')
+            line = line.replace(u'\ufeff', '')
             text += ' ' + line
-    text = text[:700] #### nachher wieder rauslöschen!!!
+    text = text[:1000] #### nachher wieder rauslöschen!!!
     return text
 # Chevrons müssen noch weg
 
 
-# In[285]:
+# In[390]:
 
 def prepare_data(text, seq_len, offset):
     # Get all the unique characters appearing in the text 
@@ -89,15 +94,15 @@ def prepare_data(text, seq_len, offset):
             X[i, j, char_idx[char]] = 1
         y[i] = char_idx[next_chars[i]]
         
-    return X, y, no_classes
+    return X, y, char_idx, idx_char, no_classes
 
 
-# In[286]:
+# In[391]:
 
 class TextDataset(Dataset):
     ''' A text dataset class which implements the abstract class torch.utils.data.Dataset. '''
     def __init__(self, text, seq_len, offset):
-        self.data, self.target, self.no_classes = prepare_data(text, seq_len, offset)
+        self.data, self.target, self.char_idx, self.idx_char, self.no_classes = prepare_data(text, seq_len, offset)
         
     def __getitem__(self, index):
         ''' Get the data for one training sample (by index) '''
@@ -110,7 +115,7 @@ class TextDataset(Dataset):
 
 # ### LSTM functions and classes
 
-# In[287]:
+# In[392]:
 
 class LSTM_RNN(nn.Module):
     
@@ -130,12 +135,13 @@ class LSTM_RNN(nn.Module):
         return (h0, c0)
     
     def forward(self, x):
+        #x = x.type(torch.DoubleTensor)
         lstm_out, self.hidden = self.lstm(x, self.hidden) # (h0, c0 are set to default values)
         res = self.softmax(self.linear(lstm_out[-1])) # use only the output of the last layer of lstm
         return res
 
 
-# In[288]:
+# In[393]:
 
 # Training loop (one epoch)
 def train(model, epoch):
@@ -156,37 +162,119 @@ def train(model, epoch):
         optimizer.step()
         
         total_loss += loss.data[0]
-    print('Total loss over epoch %s: %s' %(epoch, total_loss/len(train_loader.dataset)))
+    
+    relative_loss = total_loss/len(train_loader.dataset)
+    print('Relative loss over epoch %s: %s' %(epoch, relative_loss))
+    return relative_loss # return the relative loss for later analysis
+            
+
+
+# In[394]:
+
+# Prediction loop for ONE testdata tensor
+def rnn_predict(model, testdata):
+    ''' Note: testdata have to be submitted as a tensor'''
+    testdata = torch.from_numpy(testdata)
+    print("testdata:")
+    print(testdata)
+    model.eval()
+    testdata = testdata.view(testdata.size(0), -1)
+    if args.cuda:
+        testdata = testdata.cuda()
+    testdata = testdata.type(torch.FloatTensor)
+    testdata = Variable(testdata)
+    prediction = model(testdata)
+    return prediction
+
+
+# ### Other functions
+
+# In[395]:
+
+''' Function that returns the largest factor of number that isn't the number itself '''
+def lfactor(num):
+    for i in range(num - 1, 0, -1): # go backwards from num - 1 to 1
+        if num % i == 0:            # if a number divides evenly
+            return i                # it's the largest factor
+
+
+# ### Marvins test functions
+
+# In[396]:
+
+# die funktion brauchen wir vllt gar nicht, je nachdem ob wir den test loader verwenden oder wie wir das auch immer machen
+def prepare_input(text):
+    X = np.zeros((1, args.seq_len, no_classes))  # array with one entry which have 20 lines, each 11 entrys
+    for t, char in enumerate(text):
+        X[0, t, char_idx[char]] = 1.
+    return X
+
+def sample(preds, top_n=1):
+    print("test")
+    preds = preds.data.numpy()[0]
+    print(preds)
+    print(preds.shape)
+    preds = np.log(preds)
+    exp_preds = np.exp(preds)
+    preds = exp_preds / np.sum(exp_preds)
+
+    return heapq.nlargest(top_n, range(len(preds)), preds.take)
+
+
+def predict_completion(model, text):
+    original_text = text
+    generated = text
+    completion = ''
+    next_char = ''
+    max_iterations = 100
+    i = 0
+    while next_char != ' ' and i < max_iterations:
+        i += 1
+        x = prepare_input(text)
+        preds = rnn_predict(model, x)
+        print(preds)
+        next_index = sample(preds, top_n=1)[0]
+        print(next_index)
+        next_char = idx_char[next_index]
+        print(next_char)
+        text = text[1:] + next_char
+        completion += next_char
+
+    return completion
+
+
+def predict_completions(model, text, n=3):
+    x = prepare_input(text)
+    preds = model.rnn_predict(x, verbose=0)[0]
+    next_indices = sample(preds, n)
+    return [idx_char[idx] + predict_completion(text[1:] + idx_char[idx]) for idx in next_indices]
 
 
 # ### Main code
 
-# In[289]:
-
-# test the functions defined above
-textsource = './Brown_Leseprobe.txt'
-text = prepare_text(textsource)
-feat, true_pred, no_classes = prepare_data(text, args.seq_len, args.offset)
-print(feat.shape)
-print(no_classes)
-print(text)
-
-
-# In[290]:
+# In[397]:
 
 # Generate train and test loader from our data
 train_text = prepare_text('./Brown_Leseprobe.txt')
 train_set = TextDataset(train_text, args.seq_len, args.offset)
 train_loader = DataLoader(train_set, batch_size = args.batch_size, shuffle=True)
-#dataiter = iter(train_loader)
-#print(dataiter.next())
+
+test_text = prepare_text('./Brown_Leseprobe_test.txt')
+test_set = TextDataset(test_text, args.seq_len, args.offset)
+test_loader = DataLoader(test_set, batch_size = args.batch_size, shuffle=True)
 
 # set further parameters
+char_idx = train_set.char_idx
+idx_char = train_set.idx_char
 no_classes = train_set.no_classes
 input_shape = (args.seq_len, no_classes) # seq_len * nr. of unique characters 
 
+# get len of data to determine the possible batch_size
+args.batch_size = lfactor(len(train_set))
+print(args.batch_size)
 
-# In[291]:
+
+# In[386]:
 
 # Generate model
 rnn = LSTM_RNN(input_shape)
@@ -195,41 +283,54 @@ if args.cuda:
 print(rnn)
 
 
-# In[294]:
+# In[387]:
 
 # Initialize the optimization algorithm
-optimizer = optim.RMSprop(rnn.parameters(), lr=0.01)
+optimizer = optim.RMSprop(rnn.parameters(), lr=0.05)
+
+
+# In[347]:
+
+# Run training and store history
+history = dict()
+history['loss_train'] = []
+history['loss_test'] = []
+
+# wie wir die accuracy machen, weiß ich noch nicht...
+#history['acc_train'] = []
+#history['acc_test'] = []
+
+for epoch in range(15):
+    loss_train = train(rnn, epoch)        
+    history['loss_train'].append(loss_train)      
 
 
 # In[ ]:
 
-for epoch in range(5):
-    train(rnn, epoch)
+# Try a prediction
+
+#testdata = Variable(torch.from_numpy(test_set.data[0])) # get first element from the test set
+#truth = test_set.target[0]
+#print(testdata,truth)
+
+#prediction = rnn(testdata)
+## dann muss man hier noch auf die sizes achten, ach verdammt
+#prepare_input("This is an example of input for our LSTM".lower(), train_set.data, char_idx)
+#print(predict_completions(seq, 5))
 
 
-# In[ ]:
+# In[399]:
 
 
+test = "hrend die historische Zahnrad "
+predict_completion(rnn, test.lower())
 
 
-# In[49]:
+# In[398]:
 
-rnn = nn.LSTM(10, 20, 2)
-input = Variable(torch.randn(5, 3, 10))
-h0 = Variable(torch.randn(2, 3, 20))
-c0 = Variable(torch.randn(2, 3, 20))
-output = rnn(input, (h0, c0))
-print(type(output))
-
-
-# In[50]:
-
-output = Variable(torch.rand(1,10))
-target = Variable(torch.LongTensor([1]))
-print(output, target)
-criterion = nn.CrossEntropyLoss()
-loss = criterion(output, target)
-print(loss)
+print(train_set.no_classes)
+print(char_idx)
+print(args.batch_size)
 
 
 # In[ ]:
