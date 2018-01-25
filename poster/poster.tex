@@ -89,8 +89,8 @@ In such cases \textbf{recurrent neural networks} (RNN) are the method of choice.
 
 Hereby each of the unrolled network states $A$ receives the current input $x_t$ as well as the input at time $t-1$ and computes the ouput considering both.
 
-\textbf{Long term dependencies}
-RNNs like the one above can memorize the information from the timepoint directly before the current time. But there are also situations where the information from even earlier is needed for the prediction, which is where long short term memory networks come into play.
+\textbf{Long term dependencies}: \\
+RNNs like the one above can memorize the information from the timepoint directly before the current time. But there are also situations where the information from even earlier is needed for the prediction, which is where \textbf{long short term memory networks (LSTMs)} come into play.
 
 }
 
@@ -99,7 +99,7 @@ RNNs like the one above can memorize the information from the timepoint directly
 %----------------------------------------------------------------------------------------
 %	CALIBRATION
 %----------------------------------------------------------------------------------------
-\headerbox{REQUIREMENTS}{name=calibration,column=0,below=introduction}{
+\headerbox{RESULTS}{name=calibration,column=0,below=introduction}{
 \textbf{Data Model}
 
 
@@ -111,9 +111,9 @@ RNNs like the one above can memorize the information from the timepoint directly
 %----------------------------------------------------------------------------------------
 %	OTHER INSTRUMENTATION
 %----------------------------------------------------------------------------------------
-\headerbox{Architecture}{name=instruments,span=2,column=1,row=1, below=introduction}{ % To reduce this block to 1 column width, remove 'span=2'
+\headerbox{LSTM Architecture}{name=instruments,span=2,column=1,row=1, below=introduction}{ % To reduce this block to 1 column width, remove 'span=2'
 {
-For our purpose we decided to use long short term memory networks (LSTMs). In comparison to RNNs, LSTMs have a more complex repeating module each consisting of four interacting layers. The horizontal line passing the module is the central part of an LSTM, also called the cell state $C$. There are three gates that allow to introduce or remove information from the cell state: \\
+For our purpose we decided to use long short term memory networks (LSTMs). In comparison to simple RNNs, LSTMs have a more complex repeating module each consisting of four interacting layers. The horizontal line passing the module is the central part of an LSTM, also called the cell state $C$. There are three gates that allow to introduce or remove information from the cell state: \\
 
 \begin{minipage}[c]{0.6\textwidth}
 \begin{itemize}
@@ -147,10 +147,17 @@ For our purpose we decided to use long short term memory networks (LSTMs). In co
 %----------------------------------------------------------------------------------------
 %	MEASUREMENT SETUP
 %----------------------------------------------------------------------------------------
-\headerbox{Concept}{name=application,span=2,column=1,below=instruments}{ 
+\headerbox{Requirements and Concept}{name=application,span=2,column=1,below=instruments}{ 
+\textbf{Requirements} \\
+We used the programming language python and pytorch as the framework to implement our neural network.\\ 
 
-
-
+\textbf{Concept}\\
+We used xxx as training set for our model. We decided to use a relatively small training set that allows training on a CPU. Our workflow consists of the following steps:
+\begin{itemize}
+	\item \textbf{Data preprocessing and construction of the training set}: We splitted our text into slices of a predefined length (here: 30 characters) spacing the sequences by a predefined offset (here: 4 characters). The data were than converted into an One-Hot encoding.
+	\item \textbf{Training of the RNN}: For training we used an RNN consisting of an LSTM architecture with 128 neurons, followed by a fully connected layer with as many neurons as unique characters exist in our text. Finally a softmax layer is applied to the output. 
+	\item \textbf{Prediction}: The trained network was then used to predict the next character given a sequence of 30 characters. Based on this network we predicted 5 possible word endings. 
+\end{itemize}
 
 }
 
