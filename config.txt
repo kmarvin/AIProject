@@ -4,5 +4,5 @@ cuda = False
 batch_size = 81
 num_layers = 3
 hidden_size = 128
-lr = 0.01
+lr = 0.005
 clip = 50
