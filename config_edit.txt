@@ -1,0 +1,8 @@
+seq_len = 30
+offset = 1
+cuda = False
+batch_size = 8
+num_layers = 1
+hidden_size = 128
+lr = 0.1
+clip = 1
