@@ -20,7 +20,7 @@
 %----------------------------------------------------------------------------------------
 
 \documentclass[a0paper,portrait]{baposter}
-
+\usepackage{graphicx}
 \usepackage[font=small,labelfont=bf]{caption} % Required for specifying captions to tables and figures
 \usepackage{booktabs} % Horizontal rules in tables
 \usepackage{relsize} % Used for making text smaller in some places
@@ -84,7 +84,7 @@ A classical feedforward network expects data that are independent from each othe
 In such cases \textbf{recurrent neural networks} (RNN) are the method of choice.
 
 \begin{center}
-	\includegraphics[width=0.35\linewidth]{rnn2}
+	\includegraphics[width=0.4\linewidth]{rnn2}
 \end{center}
 
 Hereby each of the unrolled network states $A$ receives the current input $x_t$ as well as the input at time $t-1$ and computes the ouput considering both.
@@ -96,26 +96,15 @@ RNNs like the one above can memorize the information from the timepoint directly
 
 
 
-%----------------------------------------------------------------------------------------
-%	CALIBRATION
-%----------------------------------------------------------------------------------------
-\headerbox{RESULTS}{name=calibration,column=0,below=introduction}{
-\textbf{Data Model}
-
-
-\textbf{System}
-
-
-}
 
 %----------------------------------------------------------------------------------------
 %	OTHER INSTRUMENTATION
 %----------------------------------------------------------------------------------------
-\headerbox{LSTM Architecture}{name=instruments,span=2,column=1,row=1, below=introduction}{ % To reduce this block to 1 column width, remove 'span=2'
+\headerbox{LSTM Architecture}{name=instruments,span=2,column=0,row=1, below=introduction}{ % To reduce this block to 1 column width, remove 'span=2'
 {
 For our purpose we decided to use long short term memory networks (LSTMs). In comparison to simple RNNs, LSTMs have a more complex repeating module each consisting of four interacting layers. The horizontal line passing the module is the central part of an LSTM, also called the cell state $C$. There are three gates that allow to introduce or remove information from the cell state: \\
 
-\begin{minipage}[c]{0.6\textwidth}
+%\begin{minipage}[c]{0.6\textwidth}
 \begin{itemize}
 \item What to forget: $f_t = \sigma(W_f \cdot [h_{t-1}, x_t] + b_f)$
 	\item Values to add: $\tilde{C}_t = tanh(W_C \cdot [h_{t-1}, x_t] + b_C)$
@@ -125,11 +114,13 @@ For our purpose we decided to use long short term memory networks (LSTMs). In co
 	$o_t = \sigma(W_o \cdot [h_{t-1}, x_t] + b_o)$ \\
 	$h_t = o_t \cdot tanh(C_t)$
 \end{itemize}
-\end{minipage}
+%\end{minipage}
 \hfill
-\begin{minipage}[l]{0.4\textwidth}
-\includegraphics[width=\textwidth]{lstm}
-\end{minipage}
+%\begin{minipage}[l]{0.4\textwidth}
+\begin{center}
+\includegraphics[width=0.6\textwidth]{lstm}
+\end{center}
+%\end{minipage}
 }
 }
 
@@ -147,16 +138,16 @@ For our purpose we decided to use long short term memory networks (LSTMs). In co
 %----------------------------------------------------------------------------------------
 %	MEASUREMENT SETUP
 %----------------------------------------------------------------------------------------
-\headerbox{Requirements and Concept}{name=application,span=2,column=1,below=instruments}{ 
+\headerbox{Requirements and Concept}{name=application,span=2,column=0,below=instruments}{ 
 \textbf{Requirements} \\
 We used the programming language python and pytorch as the framework to implement our neural network.\\ 
 
 \textbf{Concept}\\
-We used xxx as training set for our model. We decided to use a relatively small training set that allows training on a CPU. Our workflow consists of the following steps:
+We used an extract from Dan Brown's book Origin as training set for our model. We decided to use a relatively small training set that allows training on a CPU. Our workflow consists of the following steps:
 \begin{itemize}
-	\item \textbf{Data preprocessing and construction of the training set}: We splitted our text into slices of a predefined length (here: 30 characters) spacing the sequences by a predefined offset (here: 4 characters). The data were than converted into an One-Hot encoding.
+	\item \textbf{Data preprocessing and construction of the training set}: We splitted our text into slices of a predefined length (e.g. 30 characters) spacing the sequences by a predefined offset (e.g. 4 characters). The data were than converted into an One-Hot encoding.
 	\item \textbf{Training of the RNN}: For training we used an RNN consisting of an LSTM architecture with 128 neurons, followed by a fully connected layer with as many neurons as unique characters exist in our text. Finally a softmax layer is applied to the output. 
-	\item \textbf{Prediction}: The trained network was then used to predict the next character given a sequence of 30 characters. Based on this network we predicted 5 possible word endings. 
+	\item \textbf{Prediction}: The trained network was then used to predict the next character given a sequence of characters. Based on this network we predicted the following character. 
 \end{itemize}
 
 }
@@ -166,11 +157,29 @@ We used xxx as training set for our model. We decided to use a relatively small 
 %----------------------------------------------------------------------------------------
 %	CONCLUSION
 %----------------------------------------------------------------------------------------
-\headerbox{Conclusion}{name=conclusion,column=1,below=application,span=2}{
-Rest
+\headerbox{Conclusion}{name=conclusion,column=2,below=introduction,span=1}{
+One of the main challenges during this project was to define the network architecture, loss function and optimizer as well as good values for the various parameters like e.g. the learning rate. 
+\begin{itemize}
+	\item Loss function: As we needed a categorical class measure we decided to use the nn.CrossEntropyLoss which combines a LogSoftMax and the Negative Log Likelihood Loss in one single class.   
+	\item Optimizer: The Adam optimizer that uses the Adam algorithm, an extension of the stochastic gradient algorithm, provided in our case the best results. 
+	\item Parameters: By separate testing we found a value of 0.001 up to 0.0075 for the learning rate, a batch size of 16 and a hidden size of 128 to be suitable to our scenario. 
+\end{itemize}
 }
 
 
+
+%----------------------------------------------------------------------------------------
+%	CALIBRATION
+%----------------------------------------------------------------------------------------
+\headerbox{RESULTS}{name=calibration,column=2,below=conclusion}{
+\textbf{CrossEntropy Loss during training}
+
+\begin{center}
+\includegraphics[width=1.\textwidth]{rnn_bsize8}
+\end{center}
+
+
+}
 %----------------------------------------------------------------------------------------
 %	REFERENCES
 %----------------------------------------------------------------------------------------
