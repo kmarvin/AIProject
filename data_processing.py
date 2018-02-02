@@ -63,7 +63,7 @@ def prepare_text(textsource):
             line = line.replace('"', '')
             line = line.replace(u'\ufeff', '')
             text += ' ' + line
-    text = text[:1000] #### nachher wieder rauslöschen!!!
+    text = text[:10000] #### nachher wieder rauslöschen!!!
     return text
 # Chevrons müssen noch weg
 
@@ -300,7 +300,7 @@ history['loss_test'] = []
 #history['acc_train'] = []
 #history['acc_test'] = []
 
-for epoch in range(15):
+for epoch in range(20):
     loss_train = train(rnn, epoch)        
     history['loss_train'].append(loss_train)      
 
