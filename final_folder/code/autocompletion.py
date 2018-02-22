@@ -319,7 +319,7 @@ def plotLineData(header, yLabel, firstData, firstLabel, firstColor='b', xLabel='
     plt.ylabel(yLabel)
     plt.xlabel(xLabel)
     plt.legend([firstLabel], loc='upper right')
-    plt.savefig("loss_test_GRU_loop2_big_hs512_slow.png")
+    plt.savefig(str(header) + '.png')
     plt.show()
 
 # ### Main code
@@ -376,7 +376,7 @@ if __name__ == '__main__':
             history['loss_train'].append(loss_train)
             history['loss_test'].append(loss_test)
             history['acc'].append(accuracy)
-            torch.save(rnn, 'GRU_loop2_big_hs512_slow-epoch#{}.pt'.format(epoch))
+            torch.save(rnn, 'GRU-autocompletion-epoch#{}.pt'.format(epoch))
 
         # Create plots of train loss, test loss and accuracy
         plotLineData("Training loss", "loss", history['loss_train'], "loss")
