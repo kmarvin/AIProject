@@ -1,0 +1,36 @@
+<div class="container" style="background-color:#DEDEDE; padding-bottom: 20px; margin-top:5px;">
+    <div class="header clearfix">
+        <nav>
+            <ul class="nav nav-pills float-right">
+                <li class="nav-item">
+                    <a href="" class="nav-link" data-toggle="modal" data-target="#settingsModal">
+                        <img src="/static/settings.png" />
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+    <input type="text" class="form-control" ng-model="input.text" ng-model-options="{debounce:800}" ng-change="updateInputText()" id="userInput">
+    <small class="form-text text-muted">Input automatically computed after 800ms</small>
+    <div id="responseStrings"><div ng-repeat="suggest in suggestions" ng-click="selectText(suggest.text)">{{suggest.text}}</div></div>
+</div>
+
+<div class="modal fade" id="settingsModal">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-body">
+				{{settings.numberWords}}
+                <select class="form-control" ng-model="settings.numberSuggestions">
+                    <option value="1" ng-selected="true" selected>1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                </select>
+                <small class="form-text text-muted">Warning: The higher this number, the longer it takes to compute. Save automatically</small>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
