@@ -178,11 +178,11 @@ In the context of our project, we developed a text auto-completion and predictio
 
 Neural networks are a very popular solution to classification problems.
 Assumed that the given task is to distinguish pictures of different animals like for instance a cat, a dog, a zebra and an elephant. A classical feedforward network can easily be trained to classify a given picture into one of the learned categories and it can also solve that task for the following pictures. This is the case because there is no relation between the previous and the current output, meaning that the output at time $t$ is independent of the output at time $t-1$. \\
-However there are some scenarios where the previous output is needed in order to get the new output for example when dealing with sequences like text, genomes or numerical time series data. In such a case a meaningful prediction e.g. predicting the next character can only be made based on the current and one or multiple previous outputs e.g. knowing a specified number of preceding characters.
+However there are some scenarios where the previous output is needed in order to get the new output, for example when dealing with sequences like text, genomes or numerical time series data. In such a case a meaningful prediction e.g. predicting the next character can only be made based on the current and one or multiple previous outputs e.g. knowing a specified number of preceding characters.
 
 
 \subsection{Recurrent neural networks}
-In such a case like mentioned above \textbf{recurrent neural networks} (RNN) are the method of choice. Figure 1 displays the architecture of a simple RNN. Each of the unrolled network states $A$ receives the current input $x_t$ as well as the input at time $t-1$ and computes the ouput considering both. More precisely the network first calculates the hidden state $h^{(t)}$ at time $t$ using the current input $x_t$ and the previous hidden state $h^{(t-1)}$ each multiplied by the respective weight matrix, adds a bias $b_h$ and applies a specific function $g_h$ to it. After that the current output $y^{(t)}$ is derived from the hidden state $h^{(t)}$. 
+In such a case like the one mentioned above \textbf{recurrent neural networks} (RNN) are the method of choice. Figure 1 displays the architecture of a simple RNN. Each of the unrolled network states $A$ receives the current input $x_t$ as well as the input at time $t-1$ and computes the ouput considering both. More precisely the network first calculates the hidden state $h^{(t)}$ at time $t$ using the current input $x_t$ and the previous hidden state $h^{(t-1)}$ each multiplied by the respective weight matrix, adds a bias $b_h$ and applies a specific function $g_h$ to it. After that the current output $y^{(t)}$ is derived from the hidden state $h^{(t)}$. 
 \begin{align*}
 	a^{(t)} &= g_h(w_i x^{(t)} + w_R a^{(t-1)} + b_h) \\
 	h^{(t)} &= g_y(w_y a^{(t)} + b_y)
@@ -198,10 +198,10 @@ In such a case like mentioned above \textbf{recurrent neural networks} (RNN) are
 	\end{minipage}
 	\end{figure}
 
-RNNs like the ones above can apparently \glqq memorize \grqq the information from the timepoint directly before the current time. However, there are also situations where the information from even earlier is needed for the prediction. The necessity of remembering information for long time periods is also referred to as long-term dependencies. For learning them,  a special kind of RNN which is called the \textbf{Long Short Term Memory Network} (LSTM) is needed \cite{Goodfellow-et-al-2016, lstm_colah}.
+RNNs like the ones above can apparently \glqq memorize \grqq the information from the timepoint directly before the current time. However, there are also situations where the information from even earlier timesteps is needed for the prediction. The necessity of remembering information for long time periods is also referred to as long-term dependencies. For learning them,  a special kind of RNN which is called the \textbf{Long Short Term Memory Network} (LSTM) is needed \cite{Goodfellow-et-al-2016, lstm_colah}.
 
 \subsection{Long Short Term Memory Networks}
-The concept of LSTMs was first introduced in 1997 by Hochreiter \& Schmidhuber in order to tackle the problem of long-term dependencies.  
+The concept of LSTMs was first introduced in 1997 by Hochreiter \& Schmidhuber \cite{hochreiter1997long} in order to tackle the problem of long-term dependencies.  
 In comparison to RNNs, LSTMs have a more complex repeating module each consisting of four interacting layers. 
 Figure 2 depicts this module. The central part of an LSTM is the straight horizontal line, called the cell state $C$. There are three \textbf{gates} that enable to add (\glqq memorize \grqq) or remove (\glqq forget \grqq) information from the cell state. 
 
@@ -230,12 +230,12 @@ In order to add new information to the cell state, two steps are performed. Firs
 		\caption{The input gate. Source: \textit{http://colah.github.io/posts/2015-08-Understanding-LSTMs/}}
 	\end{figure}
 
-Based on these operations the cell state $C_{t-1}$ can be updated to $C_t$ by forgetting (multiplying the previous cell state by $f_t$) and adding (multiplying the candidate values $\tilde{C}_t$ with $i_t$. 
+Based on these operations the cell state $C_{t-1}$ can be updated to $C_t$ by forgetting (multiplying the previous cell state by $f_t$) and adding (multiplying the candidate values $\tilde{C}_t$ with $i_t$). 
 \begin{align*}
 	C_t = f_t \cdot C_{t-1} + i_t \cdot \tilde{C}_t
 \end{align*}
 
-Finally the output $h_t$, which is not equal to the cell state, but rather a filtered version of it, is computed at the output gate. For example if considering a language model, the cell state could contain information about a subject and the network wants to predict the following verb. The output $h_t$ could then be simply whether the subject is singular or plural providing information about how the predicted verb should be conjugated. \\
+Finally the output $h_t$, which is not equal to the cell state, but rather a filtered version of it, is computed at the output gate. For example if considering a language model, the cell state could contain information about a subject and the network wants to predict the following verb. The output $h_t$ could then be simply determined from whether the subject is singular or plural providing information about how the predicted verb should be conjugated. \\
 To compute the output a sigmoid layer and a tanh layer are used to decide which parts of the cell state should be contained in the output \cite{Goodfellow-et-al-2016, lstm_colah}.
 
 % include a picture
@@ -246,7 +246,7 @@ To compute the output a sigmoid layer and a tanh layer are used to decide which 
 	\end{figure}
 
 \subsection{Gated recurrent unit}
-The idea behind a gated recurrent unit (GRU) layer is very similar to that of a LSTM layer, although there are a few differences. There are only two gates (reset and update gate)  in a GRU instead of three in a LSTM. Also a GRU does not possess an internal cell state $c$ which is different from the hidden state $h$. The reset gate $r$ basically describes how to combine the current input and the previous hidden state, while the update gate $z$ defines how much of the previous hidden state is taken into account. Using these two gates the current hidden state $h_t$ can be calculated \cite{gulli2017deep}. 
+The idea behind a gated recurrent unit (GRU) layer is very similar to that of a LSTM layer, although there are a few differences. There are only two gates (reset and update gate)  in a GRU instead of three in a LSTM. Also a GRU does not possess an internal cell state $c$ which is different from the hidden state $h$. The reset gate $r$ basically describes how to combine the current input and the previous hidden state, while the update gate $z$ defines how much of the previous hidden state is taken into account for calculating the output. Using these two gates the current hidden state $h_t$ can be calculated \cite{gulli2017deep}. 
 \begin{align*}
 	r_t &= \sigma(W_r [h_{t-1},x_t] + b_r) \\
 	z_t &= \sigma(W_z [h_{t-1},x_t] + b_z) \\
@@ -279,11 +279,7 @@ The features are then converted into one-hot encoded vectors. One hot encoding u
 	\end{figure}
 
 \subsection{Network Architecture} \label{ssec:na}
-Our network consists of a gated recurrent unit (GRU) layer, which mainly differs from a classical LSTM layer by having only two gates (reset and update gate) instead of three (input, output and forget gate). According to GRU units perform as well as LSTMs in language modelling tasks while being computationally more efficient. We use a two-layer GRU architecture each layers consisting of 128 neurons i.e. hidden size = 128. The GRU layers are followed by a fully connected layer with as many neurons as unique characters exist in our text. Finally we apply a softplus layer which approximates a ReLU function by 
-\begin{align*}
-	f(x) = \frac{1}{\beta} \cdot log(1+ e^{\beta \cdot x_i})
-\end{align*}    
-with $\beta = 1$ in our case. \\
+Our network consists of a gated recurrent unit (GRU) layer, which mainly differs from a classical LSTM layer by having only two gates (reset and update gate) instead of three (input, output and forget gate). According to GRU units perform as well as LSTMs in language modelling tasks while being computationally more efficient. We use a two-layer GRU architecture each layers consisting of 128 neurons i.e. hidden size = 128. The GRU layers are followed by a fully connected layer with as many neurons as unique characters exist in our text. \\
 The input to the network is an one-hot encoding of size \textit{sentence length} $\times$ \textit{batch size} $\times$ \textit{number of classes}. In contrast to classification tasks, where only the last output of an LSTM/GRU layer is used, we are making a prediction at every step, so we are as well calculating loss at every step. This is also referred to as multistep loss calculation. In practice this means that we iterate over every character in a sentence, let the network predict the following character, calculate the loss regarding this prediction and add it to a total loss variable until we eventually make an update step. This approach turned out to be crucial for the network to perform reasonably.
 
 \subsection{Parameters}
@@ -383,7 +379,7 @@ How well the network performs with respect to the task of predicting the next ch
 \end{figure}
 
 \subsubsection{Prediction of the word ending} \label{ssec:we}
-To evaluate the performance of the network at predicting whole word endings we used a quite simple binary approach and checked whether the most probable word ending suggested by our network matches the true word ending in the test text. Although at best $17$ out of $50$ words were completed  correctly one can observe that many uncorrectly predicted word endings make sense anyway like for instance in the following two cases. \\
+To evaluate the performance of the network at predicting whole word endings we used a quite simple binary approach and checked whether the most probable word ending suggested by our network matches the true word ending in the test text. Although at best $17$ out of $50$ words were completed  consistent with the source text, but one can observe that many predicted word endings make sense anyway like for instance in the following two cases. \\
 
 \begin{table}[!ht]
 \footnotesize
@@ -401,7 +397,7 @@ To evaluate the performance of the network at predicting whole word endings we u
 The complete table can be found in the appendix.
 
 \subsection{Text generation} \label{ssec:tg}
-To enable the generation of meaningful texts, the network has to be trained with sequences as long as possible. We thus trained the network with sequence length 100 and afterwards let the network produce text given a seed sequence. In contrast to prior prediction tasks we retrained our model for 9 epochs in order to obtain some overfitting as we noticed that this improves the quality of the generated texts. 
+To enable the generation of meaningful texts, the network has to be trained with sequences as long as possible. We thus trained the network with sequence length 100 and afterwards let the network produce text given a seed sequence. In contrast to prior prediction tasks we retrained our model for 12 epochs in order to obtain some overfitting as we noticed that this improves the quality of the generated texts. 
 The following two example texts were produced by our text generation network given a seed:
 
 
@@ -411,15 +407,15 @@ seed: \glqq responsibility \grqq \\
 \end{minipage}}
 
 \fbox{\begin{minipage}{44em}
-seed: \glqq "psychologist" \grqq \\
+seed: \glqq psychologist \grqq \\
 ...s had a natural philosopher his sacrifice for is most developed in places where by a stame that what in the straight of the commander all the greater part of the straight of the commander all the greater part of the straight of the commander all the greater part of the straight of the commander all 
 \end{minipage}}
 
-Obviously it is quite difficult to define a quantitative measure of how well the network performs at generating new texts. A human reader can immediately conceive that the generated texts don't make sense regarding content and in the second example the network even starts to repeatedly produce the same sentence fragements. However every word or smaller text fragment taken individually is reasonable indicating that the text generation would work with a network trained with an even higher sequence length.
+Obviously it is quite difficult to define a quantitative measure of how well the network performs at generating new texts. A human reader can immediately conceive that the generated texts don't make sense regarding content and in the second example the network even starts to repeatedly produce the same sentence fragements. However every word or smaller text fragment taken individually is reasonable indicating that the text generation would work very well using a network trained with an even higher sequence length.
 
 
 \subsection{Interactive prediction}
-
+algorithmus to generate user definded number of word beginnings. then predict completion.
 
 \pagebreak
 %----------------------------------------------------------------------------------------------------------
