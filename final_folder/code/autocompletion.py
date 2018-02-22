@@ -370,7 +370,7 @@ if __name__ == '__main__':
         history['acc'] = []
 
         # train for (args.stop_epoch) epochs
-        for epoch in range(args.end_epoch+1):
+        for epoch in range(args.stop_epoch+1):
             loss_train = train(rnn, epoch)
             loss_test, accuracy = evaluate(rnn, epoch)
             history['loss_train'].append(loss_train)
