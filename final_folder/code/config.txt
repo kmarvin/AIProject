@@ -1,0 +1,9 @@
+seq_len = 100
+offset = 1
+cuda = False
+batch_size = 512
+num_layers = 2
+hidden_size = 256
+lr = 0.0004
+pretrained = False
+stop_epoch = 6
