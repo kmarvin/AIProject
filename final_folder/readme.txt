@@ -27,3 +27,8 @@ python packages:
 
 The dataset is an altered version of Friedrich Nietzsche's "Beyond Good and Evil" split into training and test (validation)
 dataset.
+
+'config.txt' is a simple config file with standard parameter variables configured for training the network from scratchm,
+which will be included on startup.
+
+Final results can be observed by executing the python script 'autocompletion.py'.
