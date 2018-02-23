@@ -1,0 +1,17 @@
+/* app css stylesheet */
+
+#responseStrings {
+    background-color: #A8B3BA;
+    border-radius: 0.25rem;
+    margin:10px 0;
+}
+
+#responseStrings > div {
+    border: solid #6E767A 1px;
+    border-radius: 0.25rem;
+    background-color: #C7C7C7;
+    display: inline-block;
+    margin: 4px;
+    padding: 2px 16px;
+    cursor: pointer;
+}
