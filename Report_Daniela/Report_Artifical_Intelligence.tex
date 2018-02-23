@@ -268,7 +268,7 @@ Within the scope of the project, we tried to assign subtasks to each member. Whi
 \subsection{Requirements}
 We used the programming language python version 3.6 and pytorch version 0.2.0-4 as the framework to implement the neural network. 
 
-\subsection{Data Preprocessing}
+\subsection{Data Preprocessing \small{(woman in charge: Daniela Schacherer)}}
 As traininig data we use Friedrich Nietzsche’s \textit{Beyond Good and Evil} which is available as a free of charge e-book via http://www.gutenberg.org. \\
 The complete text has a length of $181124$ characters and we use the first half of it to generate our training samples, while the second half was dedicated as test set. We make the complete text lower case and remove all special characters like for instance commas, points and quotation marks. \\
 To generate our training set we split the preprocessed text into slices of 100 characters spacing the sequences by an offset of 1 character. By this we yield a total of 64000 training instances (features). Additionally, the 101st character which we aim to predict is stored as well. \\
@@ -281,11 +281,11 @@ The features are then converted into one-hot encoded vectors. One hot encoding u
 		\caption{Example for an one hot encoding. Left: One hot encoding of the letter \textit{a}. Right: One hot encoding of the word \textit{and}. The encoding dimensions are \textit{sequence length} $\times$ \textit{number of classes}.}
 	\end{figure}
 
-\subsection{Network Architecture} \label{ssec:na}
+\subsection{Network Architecture \small{(woman in charge: Daniela Schacherer)}} \label{ssec:na}
 Our network consists of a gated recurrent unit (GRU) layer, which mainly differs from a classical LSTM layer by having only two gates (reset and update gate) instead of three (input, output and forget gate). According to GRU units perform as well as LSTMs in language modelling tasks while being computationally more efficient. We use a two-layer GRU architecture each layers consisting of 256 neurons i.e. hidden size = 256. The GRU layers are followed by a fully connected layer with as many neurons as unique characters exist in our text. \\
 The input to the network is an one-hot encoding of size \textit{sentence length} $\times$ \textit{batch size} $\times$ \textit{number of classes}. In contrast to classification tasks, where only the last output of an LSTM/GRU layer is used, we are making a prediction at every step, so we are as well calculating loss at every step. This is also referred to as multistep loss calculation (cf. multi-step loss/teacher forcing). In practice this means that we iterate over every character in a sentence, let the network predict the following character, calculate the loss regarding this prediction and add it to a total loss variable until we eventually make an update step. This approach turned out to be crucial for the network to perform reasonably.
 
-\subsection{Parameters}
+\subsection{Parameters \small{(man in charge: Sebastian Bek)}}
 One of the main challenges during this project apart from defining the network architecture was to find convenient settings regarding the loss function, the optimizer type as well as the values for parameters like for instance the learning rate.  
 \begin{itemize}
 	\item \textbf{Loss function}: As we needed a categorial class measure we decided to use the torch.nn.CrossEntropyLoss which combines a LogSoftMax and the Negative Log Likelihood Loss in one single class. 
@@ -298,9 +298,9 @@ One of the main challenges during this project apart from defining the network a
 	\item \textbf{Further parameters}: By separate testing (see \nameref{sec:res}) we found a value of 0.0004 up to 0.0075 for the learning rate, a batch size of 512 and a hidden size (number of neurons in the GRU layer) of 256 to be suitable to our scenario. 
 \end{itemize}
 
-The \textit{hidden\_ size} (number of hidden units\/ nodes) parameter can be interpreted as the DOFs($=$degrees of freedom) of the network. If it is set too low, the model is unable to learn reasonably, since its complexity is too low to capture the predictive factors. Generally, an increased hidden size leads to faster learning but also to faster overfitting (unability to generalize), in case it is set to high. The \textit{num\_ layers} parameter defines how many GRU layers are stacked on top of another. Increasing it to 2, leads to a more powerful network with an increased generalization ability and hence an increased accuracy, but further increasing leads again to too many degrees of freedom, which results in overfitting. Increasing the \textit{batch\_ size} parameter leads to higher computational efficiency, but also to slower learning\/ converging to a solution. A higher \textit{seq\_ len} is forcing a more content-based prediction. A higher sequence length uses more timesteps and thus more content for prediction.
+The \textit{hidden\_ size} (number of hidden units\/ nodes) parameter can be interpreted as the DOFs ($=$degrees of freedom) of the network. If it is set too low, the model is unable to learn reasonably, since its complexity is too low to capture the predictive factors. Generally, an increased hidden size leads to faster learning but also to faster overfitting (unability to generalize), in case it is set to high. The \textit{num\_ layers} parameter defines how many GRU layers are stacked on top of another. Increasing it to 2, leads to a more powerful network with an increased generalization ability and hence an increased accuracy, but further increasing leads again to too many degrees of freedom, which results in overfitting. Increasing the \textit{batch\_ size} parameter leads to higher computational efficiency, but also to slower learning/converging to a solution. A higher \textit{seq\_ len} is forcing a more content-based prediction. A higher sequence length uses more timesteps and thus more content for prediction.
 
-\subsection{Visualization}
+\subsection{Visualization \small{(man in charge: Marvin Klaus)}}
 We also implemented a GUI to provide an interactive interface to our autocompletion network.  
 
 \pagebreak
