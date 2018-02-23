@@ -33,3 +33,7 @@ which will be included on execution of the python script. In case you want to us
 option to 'True'.
 
 Final results can be observed by executing the python script 'autocompletion.py'.
+
+To start the graphical user interface run the file ui/backend.py. The execution will start a server on localhost:5000. Please make sure that this port is free to use.
+To use the graphical user interface go to this site and use the text input to send a request to the server and compute word suggestions.
+With the gear symbol in the top right corner you can set the desired number of word suggestions.
