@@ -1,4 +1,4 @@
-from flask import Flask, request, render_template, jsonify
+from flask import Flask, redirect, url_for, request, render_template, send_from_directory, jsonify
 import torch
 from easydict import EasyDict as edict
 import torch.nn as nn
@@ -6,7 +6,6 @@ from torch.autograd import Variable
 import numpy as np
 import heapq
 import itertools
-
 
 def set_config(config_path = "../config.txt", args = dict()):
     ''' Function that reads configuration parameters from a text file source.
@@ -53,7 +52,8 @@ class LSTM_RNN(nn.Module):
 
     def init_hidden(self):
         h0 = Variable(torch.zeros(args.num_layers, args.batch_size, args.hidden_size))
-        return (h0)
+        c0 = Variable(torch.zeros(args.num_layers, args.batch_size, args.hidden_size))
+        return (h0)#,c0)#Variable(torch.zeros((args.num_layers, args.batch_size, args.hidden_size)))
 
     def forward(self, x, hidden):
         lstm_out, hidden = self.lstm(x, hidden) # (h0, c0 are set to default values)
@@ -94,13 +94,13 @@ def rnn_predict(model, testdata):
 
     if args.cuda:
         testdata = testdata.cuda()
-    
+
     testdata = testdata.type(torch.FloatTensor)
     testdata = Variable(testdata)
     hidden = model.init_hidden()
     prediction = model(testdata.unsqueeze(1), hidden)
-    
-    return prediction 
+
+    return prediction
 
 def prepare_input(text):
     ''' Function to create an one-hot encoding for the given text '''
@@ -120,6 +120,10 @@ def sample(preds):
 
 def predict_completion(model, text, max_iterations=10, stop_on_space = True):
     ''' Function that iteratively predicts the following character until a space is predicted '''
+    original_text = text
+    processed = text
+
+
     i = 0
     completion = ''
     next_char = ''
@@ -139,6 +143,9 @@ def predict_completion(model, text, max_iterations=10, stop_on_space = True):
     return completion
 
 def save_word_in_dict(dictionary, word, prob):
+    '''
+        saves a word in the word dictionary. if it exists just count the number up
+    '''
     if word in dictionary:
         dictionary[word]["number"] += 1
         dictionary[word]["prob"] += prob
@@ -150,30 +157,35 @@ def save_word_in_dict(dictionary, word, prob):
             finished = True
         dictionary[word] = {"number": 1, "finished": finished, "prob": prob}
     return dictionary
-    
+
 def find_next_chars(model, different_words, word, text, number_suggestions, min_treshold, max_iterations=10):
+    '''
+        function to find the next chars given a text and a beginning of the current word
+        if requested the function calculates more than one different words
+    '''
     text += word
     text = text[:100]
     needed_number = different_words[word]["number"]
     x = prepare_input(text)
     preds = rnn_predict(model, x)
     next_chars = sample(preds[0])
-    
+
     words = []
     probs = []
     probs_sum = 0
     different_words.pop(word, None) # delete key to add the new ones
+    count_words = 1
     number_words = 0
     i = 0
     while number_words < needed_number and probs_sum < min_treshold and i < max_iterations:
         new_word = word + idx_char[next_chars[i][1]]
         words.append(new_word)
-        
+
         probs_sum += next_chars[i][0]
         prob_format = "{0:.2f}".format(next_chars[i][0])
         probs.append(float(prob_format))
         i += 1
-    
+
     result = []
     if(len(words) < needed_number):
         diff = 1 - np.sum(probs)
@@ -183,18 +195,18 @@ def find_next_chars(model, different_words, word, text, number_suggestions, min_
         different_words = save_word_in_dict(different_words, word, 0)
 
     return different_words
-            
+
 def predict_words(model, text, number_suggestions=1, min_treshold=0.90, max_iterations=20):
     ''' Function to give a number of fitting words '''
     text = text[:100]
     original_text = text
     different_words = {}
-    
+
     # init words start letters
     x = prepare_input(text)
     preds = rnn_predict(model, x)
     next_chars = sample(preds[0])
-    
+
     i = 0
     probs_sum = 0
     words = []
@@ -207,28 +219,25 @@ def predict_words(model, text, number_suggestions=1, min_treshold=0.90, max_iter
         probs.append(float(prob_format))
         i += 1
     # status: words with one letter each, maybe to few
-    
+
     result = []
     if(len(words) < number_suggestions):
-        print(probs)
-        print(np.sum(probs))
         diff = 1 - np.sum(probs)
         probs[0] += diff
         result = np.random.choice(words, number_suggestions-len(words), p=probs)
     for word in result:
         different_words = save_word_in_dict(different_words, word, different_words[word]["prob"])
-    print(different_words)
+
     # status: words with one letter each, maybe some letters multiple
-    
+
     iter = 0
     while len(different_words) < number_suggestions and iter < max_iterations:
         for word in list(different_words):
             if different_words[word]["number"] > 1 and word != ' ':
-                print(word)
                 different_words = find_next_chars(model, different_words, word, original_text, number_suggestions, min_treshold)
         iter += 1
     # status: number_suggestions different word beginings in different_words
-    
+
     # complete the not finished words
     words = []
     for word in different_words:
@@ -240,13 +249,14 @@ def predict_words(model, text, number_suggestions=1, min_treshold=0.90, max_iter
             words.append((different_words[word]["prob"], full_word))
         else:
             words.append((different_words[word]["prob"], word))
-    
-    # words with highest probability first 
+
+    # words with highest probability first
     words.sort(key=lambda tup: tup[0], reverse=True)
     format_words = list(map(lambda x: x[1], words))
 
     return format_words
 
+# server implementation
 app = Flask(__name__, template_folder='app', static_folder='app/static')
 
 model = load_model()

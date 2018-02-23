@@ -1,11 +1,5 @@
 'use strict';
 
-/*
- * todo: leere strings anzeigen
- * error anzeigen
- * gleiche string aussortieren
- * */
-
 angular.module('myApp.view', ['ngRoute'])
 
 .config(['$routeProvider', function ($routeProvider) {
@@ -19,28 +13,37 @@ angular.module('myApp.view', ['ngRoute'])
     $scope.suggestions = [];
     $scope.input = {text: ""};
     $scope.settings = {numberSuggestions: 1};
+    $scope.error = false;
 
     $scope.updateInputText = function() {
         var text = $scope.input.text;
 
         $http.post('/computeInput', {text: text, settings: $scope.settings}).then(function successCallback(response) {
-            $scope.input.error = false;
+            $scope.error = false;
             var data = response.data;
-            if(Object.keys(data).length < $scope.settings.numberSuggestions) {
-				$scope.input.error = "Through high probability there are less suggestions than requested";
+            var uniqueData = data.filter(function(item, pos) {
+				return data.indexOf(item) === pos;
+			});
+            if(uniqueData.length < parseInt($scope.settings.numberSuggestions)) {
+				$scope.error = {message: "Through high probability there are less suggestions than requested", status: "warning"};
 			}
-			$scope.suggestions = data.map(function(elem) {
-				return {text: elem};
+			$scope.suggestions = uniqueData.map(function(elem) {
+				var placeholder = elem;
+				if(elem === " ") {
+					placeholder = "_";
+				}
+				return {text: elem, placeholder: placeholder};
 			});
         }, function errorCallback(response) {
-            $scope.input.error = "Sorry, we got a Server Error";
+            $scope.error = {message: "Sorry, we got a Server Error", status: "error"};
         });
-
-        console.log(text);
     }
 
     $scope.selectText = function(text) {
-        $scope.input.text += text + " ";
+        $scope.input.text += text;
+        if(text !== " ") {
+			$scope.input.text += " ";
+		}
         $scope.suggestions = [];
         $("#userInput").focus();
     }

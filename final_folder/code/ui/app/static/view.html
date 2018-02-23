@@ -11,8 +11,13 @@
         </nav>
     </div>
     <input type="text" class="form-control" ng-model="input.text" ng-model-options="{debounce:800}" ng-change="updateInputText()" id="userInput">
-    <small class="form-text text-muted">Input automatically computed after 800ms</small>
-    <div id="responseStrings"><div ng-repeat="suggest in suggestions" ng-click="selectText(suggest.text)">{{suggest.text}}</div></div>
+    <small class="form-text text-muted">Input automatically computed after 800ms. The longer the text, the longer it takes</small>
+    <div id="responseStrings">
+		<div ng-repeat="suggest in suggestions" ng-click="selectText(suggest.text)">{{suggest.placeholder}}</div>
+    </div>
+    <div ng-show="error" ng-class="{'alert-warning': error.status == 'warning' , 'alert-danger': error.status == 'error'} " class="alert">
+		{{error.message}}
+	</div>
 </div>
 
 <div class="modal fade" id="settingsModal">
@@ -25,6 +30,7 @@
                     <option value="2">2</option>
                     <option value="3">3</option>
                     <option value="4">4</option>
+                    <option value="5">5</option>
                 </select>
                 <small class="form-text text-muted">Warning: The higher this number, the longer it takes to compute. Save automatically</small>
             </div>
