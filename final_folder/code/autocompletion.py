@@ -1,7 +1,6 @@
+# AUTOCOMPLETION PROJECT - schacherer, klaus, bek #
 
-# autocompletion project - schacherer, klaus, bek
-
-# import libraries
+# IMPORT LIBRARIES #
 import numpy as np
 from easydict import EasyDict as edict
 import torch
@@ -16,7 +15,7 @@ from matplotlib import pyplot as plt
 import heapq
 import random
 
-## class definitions
+# CLASS DEFINITIONS #
 class TextDataset(Dataset):
     ''' A text dataset class which implements the abstract class torch.utils.data.Dataset. '''
 
@@ -30,9 +29,6 @@ class TextDataset(Dataset):
     def __len__(self):
         ''' Get the number of training samples '''
         return self.data.shape[0]
-
-
-# #### LSTM functions and classes
 
 class LSTM_RNN(nn.Module):
     ''' Class defining a recurrent neural network for text autocompletion tasks. '''
@@ -60,8 +56,10 @@ class LSTM_RNN(nn.Module):
         linear_out = self.linear(lstm_out[-1])
         return linear_out, hidden
 
-## routine definitions
-def set_config(config_path = "config.txt", args = dict()): # simple config handler
+## ROUTINE DEFINITIONS ##
+
+## simple config handler
+def set_config(config_path = "config.txt", args = dict()):
     ''' Function that reads configuration parameters from a text file source. 
     Returns an edict containing all parameters and their respective values. '''
     
@@ -82,7 +80,7 @@ def set_config(config_path = "config.txt", args = dict()): # simple config handl
             args[arg] = value
     return edict(args)
 
-# #### Data Processing functions and classes
+## data processing routine
 
 def prepare_text(textsource):
     ''' Function that reads a text from a textfile with encoding utf8. 
@@ -133,6 +131,7 @@ def prepare_data(text, seq_len, offset, char_idx, idx_char):
         
     return X, y
 
+## training routine
 def train(model, epoch):
     ''' Training loop (one epoch) '''
     model.train()
@@ -150,7 +149,7 @@ def train(model, epoch):
         optimizer.zero_grad()
         loss = 0
     
-        # Iterate over a sequence, predict every next character and accumulate the loss 
+        # Iterate over a sequence, predict every next character and accumulate the loss (multi-step loss/teacher-forcing)
         for c in range(args.seq_len - 1):
             output, hidden = model(data[c, :, :].contiguous().view(1, -1, no_classes), hidden) 
             loss += criterion(output, decode(data[c+1, :, :])) # check how far away the output is from the original data
@@ -166,6 +165,7 @@ def train(model, epoch):
     print('Mean loss over epoch %s: %s' %(epoch, relative_loss))
     return relative_loss # return the relative loss for later analysis
 
+# evaluation routine
 def evaluate(model, epoch):
     ''' Evaluation loop (one epoch)'''
     model.eval()
@@ -197,8 +197,7 @@ def evaluate(model, epoch):
 
     return relative_loss, accuracy # return the relative loss and accuracy for later analysis
 
-# #### Prediction functions
-
+## prediction routines
 def rnn_predict(model, testdata):
     ''' Prediction loop for ONE testdata array '''
     testdata = torch.from_numpy(testdata)
@@ -258,7 +257,7 @@ def predict_completions(model, text, n=3):
     next_indices = sample(preds, n)
     return [idx_char[idx] + predict_completion(text[1:] + idx_char[idx]) for idx in next_indices]
 
-
+## pick random testcases from test (validation) dataset with random sequence length
 def get_testcases(text, seq_lengths = (10,100), offset = 1, num_cases = 50):
     ''' Function to generate test instances of different length from a given text. '''
     validation_sentences = []
@@ -279,8 +278,7 @@ def get_testcases(text, seq_lengths = (10,100), offset = 1, num_cases = 50):
     
     return testcases, test_endings
 
-# #### Further functions
-
+## further (general-purpose) routines
 def findOnes(sample):
     ''' Helper function to find the 1 in a one-hot encoded vector. '''
     arr = sample.data.numpy()
@@ -322,9 +320,9 @@ def plotLineData(header, yLabel, firstData, firstLabel, firstColor='b', xLabel='
     plt.savefig(str(header) + '.png')
     plt.show()
 
-# ### Main code
+# MAIN CODE #
 
-# #### Data Preprocessing, training and testing
+## data Preprocessing, training and testing
 
 if __name__ == '__main__':
     # Load configurations

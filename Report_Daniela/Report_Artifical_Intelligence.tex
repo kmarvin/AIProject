@@ -262,8 +262,8 @@ The idea behind a gated recurrent unit (GRU) layer is very similar to that of a 
 % Programming
 % %----------------------------------------------------------------------------------------------------------
 \section{Methods}
-In general the implementation was done in many group sessions including all group members. 
-Within the scope of the project we tried to assign subtasks to each member. While Marvin Klaus made greater effort in implementing the GUI, Daniela Schacherer concentrated on Data Preprocessing and network architecture and Sebastian Bek was assigned to the task of specific hyperparemter optimization and evaluation. 
+In general, the implementation was done in many group sessions including all group members. 
+Within the scope of the project, we tried to assign subtasks to each member. While Marvin Klaus made greater effort in implementing the GUI, Daniela Schacherer concentrated on Data Preprocessing and network architecture and Sebastian Bek was assigned to the task of specific hyperparemter optimization and evaluation. 
 
 \subsection{Requirements}
 We used the programming language python version 3.6 and pytorch version 0.2.0-4 as the framework to implement the neural network. 
@@ -272,7 +272,7 @@ We used the programming language python version 3.6 and pytorch version 0.2.0-4 
 As traininig data we use Friedrich Nietzsche’s \textit{Beyond Good and Evil} which is available as a free of charge e-book via http://www.gutenberg.org. \\
 The complete text has a length of $181124$ characters and we use the first half of it to generate our training samples, while the second half was dedicated as test set. We make the complete text lower case and remove all special characters like for instance commas, points and quotation marks. \\
 To generate our training set we split the preprocessed text into slices of 100 characters spacing the sequences by an offset of 1 character. By this we yield a total of 64000 training instances (features). Additionally, the 101st character which we aim to predict is stored as well. \\
-The features are then converted into one-hot encoded vectors. One hot encoding uses one boolean column for each of the classes that in our case correspond to the unique characters. Naturally only one of these columns can take the value 1 (= true) for one sample. Thus, for one sentence we obtain an one hot encoding with dimension \textit{sentence length} $\times$ \textit{number of classes}.
+The features are then converted into one-hot encoded vectors. One hot encoding uses one boolean column for each of the classes that in our case correspond to the unique characters. Naturally only one of these columns can take the value 1 (= true) for one sample. Thus, for one sentence we obtain an one hot encoding with dimension \textit{sequence length} $\times$ \textit{number of classes}.
 
 % include a picture
 	\begin{figure}[h!] 
@@ -282,8 +282,8 @@ The features are then converted into one-hot encoded vectors. One hot encoding u
 	\end{figure}
 
 \subsection{Network Architecture} \label{ssec:na}
-Our network consists of a gated recurrent unit (GRU) layer, which mainly differs from a classical LSTM layer by having only two gates (reset and update gate) instead of three (input, output and forget gate). According to GRU units perform as well as LSTMs in language modelling tasks while being computationally more efficient. We use a two-layer GRU architecture each layers consisting of 128 neurons i.e. hidden size = 128. The GRU layers are followed by a fully connected layer with as many neurons as unique characters exist in our text. \\
-The input to the network is an one-hot encoding of size \textit{sentence length} $\times$ \textit{batch size} $\times$ \textit{number of classes}. In contrast to classification tasks, where only the last output of an LSTM/GRU layer is used, we are making a prediction at every step, so we are as well calculating loss at every step. This is also referred to as multistep loss calculation. In practice this means that we iterate over every character in a sentence, let the network predict the following character, calculate the loss regarding this prediction and add it to a total loss variable until we eventually make an update step. This approach turned out to be crucial for the network to perform reasonably.
+Our network consists of a gated recurrent unit (GRU) layer, which mainly differs from a classical LSTM layer by having only two gates (reset and update gate) instead of three (input, output and forget gate). According to GRU units perform as well as LSTMs in language modelling tasks while being computationally more efficient. We use a two-layer GRU architecture each layers consisting of 256 neurons i.e. hidden size = 256. The GRU layers are followed by a fully connected layer with as many neurons as unique characters exist in our text. \\
+The input to the network is an one-hot encoding of size \textit{sentence length} $\times$ \textit{batch size} $\times$ \textit{number of classes}. In contrast to classification tasks, where only the last output of an LSTM/GRU layer is used, we are making a prediction at every step, so we are as well calculating loss at every step. This is also referred to as multistep loss calculation (cf. multi-step loss/teacher forcing). In practice this means that we iterate over every character in a sentence, let the network predict the following character, calculate the loss regarding this prediction and add it to a total loss variable until we eventually make an update step. This approach turned out to be crucial for the network to perform reasonably.
 
 \subsection{Parameters}
 One of the main challenges during this project apart from defining the network architecture was to find convenient settings regarding the loss function, the optimizer type as well as the values for parameters like for instance the learning rate.  
@@ -297,6 +297,8 @@ One of the main challenges during this project apart from defining the network a
 	
 	\item \textbf{Further parameters}: By separate testing (see \nameref{sec:res}) we found a value of 0.0004 up to 0.0075 for the learning rate, a batch size of 512 and a hidden size (number of neurons in the GRU layer) of 256 to be suitable to our scenario. 
 \end{itemize}
+
+The \textit{hidden\_ size} (number of hidden units\/ nodes) parameter can be interpreted as the DOFs($=$degrees of freedom) of the network. If it is set too low, the model is unable to learn reasonably, since its complexity is too low to capture the predictive factors. Generally, an increased hidden size leads to faster learning but also to faster overfitting (unability to generalize), in case it is set to high. The \textit{num\_ layers} parameter defines how many GRU layers are stacked on top of another. Increasing it to 2, leads to a more powerful network with an increased generalization ability and hence an increased accuracy, but further increasing leads again to too many degrees of freedom, which results in overfitting. Increasing the \textit{batch\_ size} parameter leads to higher computational efficiency, but also to slower learning\/ converging to a solution. A higher \textit{seq\_ len} is forcing a more content-based prediction. A higher sequence length uses more timesteps and thus more content for prediction.
 
 \subsection{Visualization}
 We also implemented a GUI to provide an interactive interface to our autocompletion network.  
@@ -331,14 +333,14 @@ As can be inferred from figure \ref{fig:loss1} we were able to depress the loss 
 	\item hidden size: $256$
 	\item sequence length of training and test samples: 100 characters
 \end{itemize}
-The test loss reaches its minimum of $1.7$ in epoch $6$ and then starts to increase again. This indicates that overfitting to the training data is occuring from then on (compare figure \ref{fig:stop}). As we want to avoid this phenomenon in the first place we stop the training and save the network parameters after the $6$th training epoch. However, if the network is applied for text generation overfitting is desired which is why we use a different number of training epochs for this task (see section \ref{ssec:tg}).
+The test loss reaches its minimum of $1.7$ in epoch $6$ and then starts to increase again. This indicates that overfitting to the training data is occuring from then on (compare figure \ref{fig:stop}). As we want to avoid this phenomenon in the first place, we stop the training and save the network parameters after the $6$th training epoch. However, if the network is applied for text generation overfitting is desired which is why we use a different number of training epochs for this task (see section \ref{ssec:tg}).
 
 % include a picture
 \begin{figure}[H]
    \begin{minipage}{\textwidth}
      \centering
      \includegraphics[width=.4\textwidth]{early-stopping-graphic}
-     \caption{Schematic of a neural network training with early stopping. The network is repeatedly trained as long as the error on the validation set (test error) is on the decrease. When the test error starts to increase, the training is halted. Source \textit{https://elitedatascience.com/overfitting-in-machine-learning}}
+     \caption{Schematic of a neural network training with early stopping. The network is repeatedly trained as long as the error on the test set (test error) is on the decrease. When the test error starts to increase, the training is halted. Source \textit{https://elitedatascience.com/overfitting-in-machine-learning}}
      \label{fig:stop}
    \end{minipage}\\[1em]   
 \end{figure}
@@ -346,7 +348,7 @@ The test loss reaches its minimum of $1.7$ in epoch $6$ and then starts to incre
 \subsection{Determination of the optimal hidden size}
 We tested different values for the hidden size i.e. number of neurons in the hidden layer of the GRU, and evaluated them by observing the prediction accuracy on the test set. 
 We examine the amount of correctly predicted characters for sequences of length \textit{seqlen}, which are generated analogously to the training samples but originate from the second half of our input text which we dedicated as test text. The ratio of correctly predicted characters is referred to as the accuracy of the network. \\
-For this purpose we used a learning rate of $0.001$ instead of $0.0004$ in order to ease observing the long-term behaviour. The figure below shows accuracy plots for a hidden size of $128$ respectively $256$. As we reached a higher prediction accuracy ($51 \%$) using the larger hidden size we fixed this parameter for further testing.  
+For this purpose we used a learning rate of $0.001$ instead of $0.0004$ in order to ease observing the long-term behaviour. The figure below shows accuracy plots for a hidden size of $128$ respectively $256$. As we reached a higher prediction accuracy ($51 \%$) using the larger hidden size we fixed this parameter for further testing.  Further increasement of the hidden size only leads to higher computation effort and faster overfitting.
 
 % include a picture
 \begin{figure}[!ht]
@@ -369,7 +371,7 @@ We present the performance evaluation on the two-layer GRU network trained with 
 \end{itemize} 
 
 \subsubsection{Prediction of the next character}
-How well the network performs with respect to the task of predicting the next character is measured as described in the previous section. As the accuracy reaches its maximum at epoch 6 we stopped training and saved the network parameters at this point. 
+How well the network performs, with respect to the task of predicting the next character, is measured as described in the previous section. As the accuracy reaches its maximum at epoch 6, we stopped training and saved the network parameters at this point. 
 
 % include a picture
 \begin{figure}[!ht]
@@ -382,7 +384,7 @@ How well the network performs with respect to the task of predicting the next ch
 \end{figure}
 
 \subsubsection{Prediction of the word ending} \label{ssec:we}
-To evaluate the performance of the network at predicting whole word endings we used a quite simple binary approach and checked whether the most probable word ending suggested by our network matches the true word ending in the test text. Although at best $17$ out of $50$ words were completed  consistent with the source text, but one can observe that many predicted word endings make sense anyway like for instance in the following two cases. \\
+To evaluate the performance of the network at predicting whole word endings we used a quite simple binary approach and checked whether the most probable word ending suggested by our network matches the true word ending in the test text. Although at best $17$ out of $50$ words were completed consistent with the source text, one can observe that many predicted word endings make sense anyway like for instance in the following two cases. \\
 
 \begin{table}[!ht]
 \footnotesize
@@ -414,7 +416,7 @@ seed: \glqq psychologist \grqq \\
 ...s had a natural philosopher his sacrifice for is most developed in places where by a stame that what in the straight of the commander all the greater part of the straight of the commander all the greater part of the straight of the commander all the greater part of the straight of the commander all 
 \end{minipage}}
 
-Obviously it is quite difficult to define a quantitative measure of how well the network performs at generating new texts. A human reader can immediately conceive that the generated texts don't make sense regarding content and in the second example the network even starts to repeatedly produce the same sentence fragements. However every word or smaller text fragment taken individually is reasonable indicating that the text generation would work very well using a network trained with an even higher sequence length.
+Obviously it is quite difficult to define a quantitative measure of how well the network performs at generating new texts. A human reader can immediately conceive that the generated texts don't make sense regarding content and in the second example the network even starts to repeatedly produce the same sentence fragements. However, every word or smaller text fragment taken individually is reasonable indicating that the text generation would work very well using a network trained with an even higher sequence length or trained with a larger dataset processed with more computational power.
 
 
 \subsection{Interactive prediction}
@@ -425,11 +427,11 @@ algorithmus to generate user definded number of word beginnings. then predict co
 % Discussion
 % %----------------------------------------------------------------------------------------------------------
 \section{Discussion}
-In summary we could successfully implement our recurrent neural network and apply it to text autocompletion and text generation tasks. As already mentioned above, finding a suitable network architecture along with an optimal parameter setting turned out to be one of the most time consuming steps within the project. Apart from this problems regarding different operating systems and the lengthy training of the network took a lot of time as well. 
+In summary, we could successfully implement our recurrent neural network and apply it to text autocompletion and text generation tasks. As already mentioned above, finding a suitable network architecture along with an optimal parameter setting turned out to be one of the most time consuming steps within the project. Apart from this problems regarding different operating systems and the lengthy training of the network took a lot of time as well. 
 
 In the end we reached a maximal next-character prediction accuracy of 50\% which is not really convincing at first sight. The word-ending prediction accuracy is even lower than 50\%. However as shown in subsection \ref{ssec:we} it is necessary to take a closer look when dealing with natural language processing tasks. For the analysis of how well word endings are predicted we would thus need a more sensitive measure, which does not simply distinguish between \textit{correct} and \textit{wrong} but takes into account how much sense the word ending makes in the given context. If there was more time for the project this would be a helpful extension in order to assess the quality of such networks. 
 
-The text generation ability of our network turned out to be good but improvable. It would be interesting to further investigate the sequence length of training samples necessary to produce meaningful texts. These could then be suitable as chatbots or similar. Also, for the prediction as well as the text generation tasks an even larger training set would possibly lead to a performance growth. For an application of our network in practice more time and developmental work would be needed. However with this project we could show that the task is solvable with moderate computing capacity and within a limited time frame. 
+The text generation ability of our network turned out to be good but improvable. It would be interesting to further investigate the sequence length of training samples necessary to produce meaningful texts. These could then be suitable as chatbots or similar. Also, for the prediction as well as the text generation tasks an even larger training set would possibly lead to a performance growth. For an application of our network in practice, more time and developmental work would be needed. However, with this project we could prove that the task is solvable with moderate computing capacity and within a limited time frame conveniently. 
 
 \pagebreak
 \section{Appendix}

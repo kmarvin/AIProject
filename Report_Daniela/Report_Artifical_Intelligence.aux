@@ -31,6 +31,7 @@
 \providecommand*\caption@xref[2]{\@setref\relax\@undefined{#1}}
 \newlabel{fig:rnn0}{{\caption@xref {fig:rnn0}{ on input line 196}}{1}{Recurrent neural networks}{figure.caption.1}{}}
 \@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces An unrolled recurrent neural network. Source: \textit  {http://colah.github.io/posts/2015-08-Understanding-LSTMs/}\relax }}{1}{figure.caption.1}}
+\citation{hochreiter1997long}
 \citation{Goodfellow-et-al-2016}
 \citation{lstm_colah}
 \@writefile{toc}{\contentsline {subsection}{\numberline {2.2}Long Short Term Memory Networks}{2}{subsection.2.2}}
@@ -47,7 +48,7 @@
 \@writefile{toc}{\contentsline {section}{\numberline {3}Methods}{4}{section.3}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {3.1}Requirements}{4}{subsection.3.1}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {3.2}Data Preprocessing}{4}{subsection.3.2}}
-\newlabel{fig:onehot}{{\caption@xref {fig:onehot}{ on input line 277}}{4}{Data Preprocessing}{figure.caption.6}{}}
+\newlabel{fig:onehot}{{\caption@xref {fig:onehot}{ on input line 280}}{4}{Data Preprocessing}{figure.caption.6}{}}
 \@writefile{lof}{\contentsline {figure}{\numberline {6}{\ignorespaces Example for an one hot encoding. Left: One hot encoding of the letter \textit  {a}. Right: One hot encoding of the word \textit  {and}. The encoding dimensions are \textit  {sequence length} $\times $ \textit  {number of classes}.\relax }}{4}{figure.caption.6}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {3.3}Network Architecture}{4}{subsection.3.3}}
 \newlabel{ssec:na}{{3.3}{4}{Network Architecture}{subsection.3.3}{}}
@@ -58,8 +59,8 @@
 \@writefile{toc}{\contentsline {subsection}{\numberline {4.1}Training and testing performance}{6}{subsection.4.1}}
 \@writefile{lof}{\contentsline {figure}{\numberline {7}{\ignorespaces Training of the network was performed using a two-layer GRU, a learning rate of $0.0004$, a batch size of $512$ and a hidden size of $256$. Input sequence length was 100 characters. The left image shows the training loss while the right figure displays the loss during testing.\relax }}{6}{figure.caption.7}}
 \newlabel{fig:loss1}{{7}{6}{Training of the network was performed using a two-layer GRU, a learning rate of $0.0004$, a batch size of $512$ and a hidden size of $256$. Input sequence length was 100 characters. The left image shows the training loss while the right figure displays the loss during testing.\relax }{figure.caption.7}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {8}{\ignorespaces Schematic of a neural network training with early stopping. The network is repeatedly trained as long as the error on the validation set (test error) is on the decrease. When the test error starts to increase, the training is halted. Source \textit  {https://elitedatascience.com/overfitting-in-machine-learning}\relax }}{7}{figure.caption.8}}
-\newlabel{fig:stop}{{8}{7}{Schematic of a neural network training with early stopping. The network is repeatedly trained as long as the error on the validation set (test error) is on the decrease. When the test error starts to increase, the training is halted. Source \textit {https://elitedatascience.com/overfitting-in-machine-learning}\relax }{figure.caption.8}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {8}{\ignorespaces Schematic of a neural network training with early stopping. The network is repeatedly trained as long as the error on the test set (test error) is on the decrease. When the test error starts to increase, the training is halted. Source \textit  {https://elitedatascience.com/overfitting-in-machine-learning}\relax }}{7}{figure.caption.8}}
+\newlabel{fig:stop}{{8}{7}{Schematic of a neural network training with early stopping. The network is repeatedly trained as long as the error on the test set (test error) is on the decrease. When the test error starts to increase, the training is halted. Source \textit {https://elitedatascience.com/overfitting-in-machine-learning}\relax }{figure.caption.8}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {4.2}Determination of the optimal hidden size}{7}{subsection.4.2}}
 \@writefile{lof}{\contentsline {figure}{\numberline {9}{\ignorespaces Prediction accuracy on the test set. Left: Training was performed using a two-layer GRU, a learning rate of $0.001$, a batch size of $512$ and a hidden size of $128$. A maximum accuracy of $49\%$ is reached. Right: Training was performed using a two-layer GRU, a learning rate of $0.001$, a batch size of $512$ but a hidden size of $256$. Here a maximum accuracy of $51 \%$ could be achieved after 3 epochs of training.\relax }}{7}{figure.caption.9}}
 \newlabel{fig:sub1}{{9}{7}{Prediction accuracy on the test set. Left: Training was performed using a two-layer GRU, a learning rate of $0.001$, a batch size of $512$ and a hidden size of $128$. A maximum accuracy of $49\%$ is reached. Right: Training was performed using a two-layer GRU, a learning rate of $0.001$, a batch size of $512$ but a hidden size of $256$. Here a maximum accuracy of $51 \%$ could be achieved after 3 epochs of training.\relax }{figure.caption.9}{}}

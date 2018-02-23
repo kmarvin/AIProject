@@ -25,10 +25,11 @@ python packages:
 - char/word prediction
 - text generation
 
-The dataset is an altered version of Friedrich Nietzsche's "Beyond Good and Evil" split into training and test (validation)
-dataset.
+The dataset is an altered (pre-processed) version of Friedrich Nietzsche's "Beyond Good and Evil" split into training and 
+test dataset. The pre-processing routine removes all special characters from the initial text book.
 
-'config.txt' is a simple config file with standard parameter variables configured for training the network from scratchm,
-which will be included on startup.
+'config.txt' is a simple config file with standard parameter variables configured for training the network from scratch,
+which will be included on execution of the python script. In case you want to use a pretrained network, set the pretrained 
+option to 'True'.
 
 Final results can be observed by executing the python script 'autocompletion.py'.
