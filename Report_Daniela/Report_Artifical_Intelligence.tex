@@ -110,7 +110,7 @@
 \begin{minipage}{0.4\textwidth}
 \begin{flushleft} \large
 \emph{Author:}\\
-Daniela Schacherer \\% Your name
+Marvin Klaus \\% Your name
 \end{flushleft}
 
 \begin{flushleft} \large
@@ -300,8 +300,16 @@ One of the main challenges during this project apart from defining the network a
 
 The \textit{hidden\_ size} (number of hidden units\/ nodes) parameter can be interpreted as the DOFs ($=$degrees of freedom) of the network. If it is set too low, the model is unable to learn reasonably, since its complexity is too low to capture the predictive factors. Generally, an increased hidden size leads to faster learning but also to faster overfitting (unability to generalize), in case it is set to high. The \textit{num\_ layers} parameter defines how many GRU layers are stacked on top of another. Increasing it to 2, leads to a more powerful network with an increased generalization ability and hence an increased accuracy, but further increasing leads again to too many degrees of freedom, which results in overfitting. Increasing the \textit{batch\_ size} parameter leads to higher computational efficiency, but also to slower learning/converging to a solution. A higher \textit{seq\_ len} is forcing a more content-based prediction. A higher sequence length uses more timesteps and thus more content for prediction.
 
-\subsection{Visualization \small{(man in charge: Marvin Klaus)}}
-We also implemented a GUI to provide an interactive interface to our autocompletion network.  
+\subsection{Visualization \small{(man in charge: Marvin Klaus)}} \label{sec:vis}
+We also implemented a GUI to provide an interactive interface to our auto-completion network. We decided to create the user interface as a web application that send requests to a server where the network model is running. With the response, the application gets an array of possible following words. Since this is no web development course we will just briefly describe the frontend and then focus more on the server and the backend.
+
+\subsubsection{Frontend}
+
+For the frontend, we used the JavaScript MVC Framework \textit{AngularJS}. With some CSS and HTML, we build a very basic User Interface. Just to understand the structure of the frontend we now describe how the application is build. The \textit{app.js} file is the center of an angular application. Here we create the app and integrate the view which is created in the \textit{view.js}. In this file we configure when to show this view and create a controller that is responsible for the communication with the server. In our \textit{view.html} we just build the user interface and link the view to the controller. The \textit{index.html} is just responsible for integrate all needed files and tell the browser in which position to show the view.
+
+\subsubsection{Backend}
+
+For the backend, we decided to use the Python Framework \textit{Flask} for the communication between the frontend and the server. The only things we need to run the server are two routes, one for the index and one to run the model. With a POST Request to the route \textit{/computeInput} we call the model with the given text. For this case we created the main part of the backend, the method \textit{predict\_words()}. The difficulty was to get a given number of different words, where the probability for each word should be over a given threshold. We will now give a rough description of the algorithm so you will get the idea. First, we need the beginning of each of the \textit{n} needed words. For this we call the model until we get this number of first characters or the probability exceeds a specific threshold, what is 0.9 by default. Important is to compute the start letters of the other words if we get too few in the first step. For this purpose, we must get the other characters from the given ones, based by their probability. After this step we may have some start letters multiple times. Thats why need to continue to calculate the next characters of these multiple strings, until we have \textit{n} different words. In the last step, we just have to complete them if they are not yet completed, this happens with the \textit{predict\_completion()} method. The resulting words are just passed back to the frontend.
 
 \pagebreak
 
@@ -420,7 +428,9 @@ Obviously it is quite difficult to define a quantitative measure of how well the
 
 
 \subsection{Interactive prediction}
-algorithmus to generate user definded number of word beginnings. then predict completion.
+
+With the presented method in section \ref{sec:vis} we build a user interface located in the folder \textit{/code/ui}. To start the application, you just run the file \textit{backend.py} which starts the server at \textit{localhost:5000}. If you go to this address, you see a text input and a gear symbol to give the user the option to select the number of words to suggest. To get words from the network you just have to write text and 800ms after the last edit a request is fired. The suggested words are displayed right under the text input. It is possible that the number of words is less than requested. This happens when the probability for the displayed words are just too high. To select a word just click on it and you can continue to write.\\
+The longer the text in the input is, the longer the model takes to compute the next words. We could prevent this if we just give the last word in the network, but we decided to take the longer time and therefore the whole text is included in the computation of the next words.
 
 \pagebreak
 %----------------------------------------------------------------------------------------------------------
